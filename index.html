@@ -552,6 +552,7 @@ a{transition:.2s}
   © 2026 Maria Bonita Concept — Todos os direitos reservados.
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   /*
     COMO EDITAR OS PRODUTOS:
@@ -572,9 +573,8 @@ const defaultProducts = [
     {id:9,name:"Bolsa Paris",category:"Calcinhas",price:139.90,image:"",sizes:["Único"],colors:["Caramelo","Preto"]},
     {id:10,name:"Cinto Milano",category:"Calcinhas",price:69.90,image:"",sizes:["Único"],colors:["Marrom","Preto"]}
   ];
-  let products = JSON.parse(localStorage.getItem("mariaBonitaProducts") || "null") || defaultProducts;
-  const settings = JSON.parse(localStorage.getItem("mariaBonitaSettings") || "{}");
-  const WHATSAPP = settings.whatsapp || "5500000000000";
+  let products = [];
+  let WHATSAPP = "5500000000000";
 
   let cart = [];
   let currentCategory = "Todos";
@@ -582,22 +582,22 @@ const defaultProducts = [
   const money = value => value.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 
   function renderProducts(){
-    products = JSON.parse(localStorage.getItem("mariaBonitaProducts") || "null") || defaultProducts;
+
     const grid = document.getElementById("productGrid");
     const list = currentCategory === "Todos" ? products : products.filter(p=>p.category===currentCategory);
 
     grid.innerHTML = list.map(p => `
-      <article class="product" onclick="openProduct(${p.id})">
+      <article class="product" onclick="openProduct('${p.id}')">
         <div class="product-img">
-          ${(p.images&&p.images.length?p.images[0]:p.image) ? `<img src="${(p.images&&p.images.length?p.images[0]:p.image)}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover">` : `<span>${p.name}</span>`}
-          <span class="tag">${p.category}</span>
+          ${(p.images&&p.images.length?p.images[0]:p.image) ? `<img src="${(p.images&&p.images.length?p.images[0]:p.image)}" alt="${safeText(p.name)}" style="width:100%;height:100%;object-fit:cover">` : `<span>${safeText(p.name)}</span>`}
+          <span class="tag">${safeText(p.category)}</span>
         </div>
         <div class="product-body">
-          <h3>${p.name}</h3>
+          <h3>${safeText(p.name)}</h3>
           <div class="price">${money(p.price)}</div>
-          <select id="size-${p.id}" onclick="event.stopPropagation()">${p.sizes.map(s=>`<option>${s}</option>`).join("")}</select>
-          <select id="color-${p.id}" onclick="event.stopPropagation()">${p.colors.map(c=>`<option>${c}</option>`).join("")}</select>
-          <button class="add" onclick="event.stopPropagation();addToCart(${p.id})">Adicionar à sacola</button>
+          <select id="size-${p.id}" onclick="event.stopPropagation()">${p.sizes.map(s=>`<option>${safeText(s)}</option>`).join("")}</select>
+          <select id="color-${p.id}" onclick="event.stopPropagation()">${p.colors.map(c=>`<option>${safeText(c)}</option>`).join("")}</select>
+          <button class="add" onclick="event.stopPropagation();addToCart('${p.id}')">Adicionar à sacola</button>
         </div>
       </article>
     `).join("");
@@ -642,8 +642,8 @@ const defaultProducts = [
     box.innerHTML = cart.map(x=>`
       <div class="cart-item">
         <div>
-          <strong>${x.name}</strong>
-          <small>${x.size} · ${x.color} · ${x.qty}x</small><br>
+          <strong>${safeText(x.name)}</strong>
+          <small>${safeText(x.size)} · ${safeText(x.color)} · ${x.qty}x</small><br>
           <span>${money(x.price*x.qty)}</span>
         </div>
         <button class="remove" onclick="removeFromCart('${x.key}')">Remover</button>
@@ -739,8 +739,8 @@ function getProductImages(p){
     const sizes=p.sizes&&p.sizes.length?p.sizes:["Único"];
     const colors=p.colors&&p.colors.length?p.colors:["Única"];
 
-    document.getElementById("detailSize").innerHTML=sizes.map(x=>`<option>${x}</option>`).join("");
-    document.getElementById("detailColor").innerHTML=colors.map(x=>`<option>${x}</option>`).join("");
+    document.getElementById("detailSize").innerHTML=sizes.map(x=>`<option>${safeText(x)}</option>`).join("");
+    document.getElementById("detailColor").innerHTML=colors.map(x=>`<option>${safeText(x)}</option>`).join("");
 
     document.getElementById("detailBuy").onclick=function(){
       const size=document.getElementById("detailSize").value;
@@ -774,7 +774,7 @@ function getProductImages(p){
     }
 
     const i=window.currentDetailImage||0;
-    main.innerHTML=`<div class="detail-main-photo-wrap"><img class="detail-main-photo" src="${imgs[i]}" alt="${p.name}"></div>`;
+    main.innerHTML=`<div class="detail-main-photo-wrap"><img class="detail-main-photo" src="${imgs[i]}" alt="${safeText(p.name)}"></div>`;
     setupImageZoom();
     thumbs.innerHTML=imgs.map((src,n)=>`
       <img class="detail-thumb ${n===i?"active":""}" src="${src}" alt=""
@@ -799,8 +799,26 @@ function getProductImages(p){
     });
   }
 
-  renderProducts();
-  renderCart();
+const online=supabase.createClient('https://oasmkfdweixuyosrrmla.supabase.co','sb_publishable_WV9wLfV_xtpS5oMknWalKQ_6nUNioCP');
+
+function safeText(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+async function loadOnlineCatalogue(){
+ const grid=document.getElementById('productGrid');if(!products.length)grid.innerHTML='<p>Carregando produtos…</p>';
+ try{
+  const results=await Promise.all([online.from('mb_products').select('*').order('created_at'),online.from('mb_categories').select('name').order('name'),online.from('mb_settings').select('whatsapp').eq('id',1).maybeSingle()]);
+  for(const result of results)if(result.error)throw result.error;
+  products=results[0].data.map(p=>({...p,price:Number(p.price)}));WHATSAPP=results[2].data?.whatsapp||'5500000000000';
+  const categories=[...new Set([...results[1].data.map(c=>c.name),...products.map(p=>p.category)])];
+  if(!categories.includes(currentCategory))currentCategory='Todos';
+  const box=document.querySelector('.categories');box.replaceChildren();
+  for(const name of ['Todos',...categories]){const button=document.createElement('button');button.className='cat'+(currentCategory===name?' active':'');button.textContent=name;button.onclick=()=>filterProducts(name,button);box.appendChild(button)}
+  renderProducts();if(!products.length)grid.innerHTML='<p>Novidades chegando em breve.</p>';
+ }catch(e){grid.innerHTML='<p>Não foi possível carregar o catálogo. <button class="cat" onclick="loadOnlineCatalogue()">Tentar novamente</button></p>'}
+}
+loadOnlineCatalogue();renderCart();
+window.addEventListener('pageshow',e=>{if(e.persisted)loadOnlineCatalogue()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadOnlineCatalogue()});
+setInterval(()=>{if(!document.hidden)loadOnlineCatalogue()},60000);
 </script>
 </body>
 </html>
