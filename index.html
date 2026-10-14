@@ -396,6 +396,63 @@ a{transition:.2s}
 ::selection{background:rgba(185,150,63,.25);color:#201d1b}
 </style>
 
+<style id="mobile-layout">
+@media(max-width:900px){
+ .top{flex-wrap:wrap;gap:12px}
+ nav{order:3;width:100%;padding:12px 0;gap:20px;overflow-x:auto;white-space:nowrap;justify-content:flex-start}
+ nav a{flex-shrink:0;padding:6px 0}
+}
+@media(max-width:600px){
+ body{overflow-wrap:anywhere}
+ .topbar{font-size:10px;line-height:1.5;padding:8px 14px}
+ .top{padding:14px 16px;gap:12px}
+ .logo{font-size:21px;letter-spacing:.2px;flex:1;min-width:0}
+ .logo small{font-size:8px;letter-spacing:2px;text-align:left}
+ .cart-btn{flex-shrink:0;font-size:12px;min-height:44px;padding:10px 13px}
+ nav{display:flex;font-size:13px;border-top:1px solid var(--gold-line)}
+ .hero{margin:18px auto;padding:0 16px}
+ .hero-box{min-height:0;padding:30px 24px;border-radius:16px}
+ .hero-copy{padding:8px 0;max-width:100%}
+ .eyebrow{font-size:10px;letter-spacing:2px}
+ .hero h1{font-size:clamp(30px,8.6vw,40px);line-height:1.1;margin:16px 0}
+ .hero p{font-size:15px;line-height:1.6}
+ .cta{min-height:46px;font-size:13px;margin-top:12px;padding:15px 20px}
+ .benefits{padding:0 16px}
+ .benefitgrid{grid-template-columns:1fr;border-radius:12px;overflow:hidden}
+ .benefitgrid>div{padding:14px 12px;border-right:0}
+ .benefitgrid>div:not(:last-child):after{display:none}
+ .benefitgrid b{font-size:15px}
+ main{padding:0 16px 36px}
+ .section-title{font-size:26px;margin:30px 0 16px}
+ .categories{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;gap:8px}
+ .cat{flex-shrink:0;min-height:44px;padding:11px 15px;font-size:13px}
+ .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .product{min-width:0;border-radius:12px}
+ .product-img{height:auto;aspect-ratio:3/4;font-size:15px;text-align:center}
+ .product-body{padding:12px 10px}
+ .product h3{font-size:16px;line-height:1.35}
+ .product .price{font-size:15px}
+ .tag{top:8px;left:8px;font-size:8px;padding:5px 7px}
+ .add{min-height:44px;font-size:13px}
+ input,select,textarea{font-size:16px}
+ .cart-panel{width:100%;height:100dvh;padding:20px 16px;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+ .cart-item{grid-template-columns:minmax(0,1fr) auto}
+ .close{width:44px;height:44px}
+ .detail-wrap{padding:12px 16px calc(30px + env(safe-area-inset-bottom))}
+ .detail-nav{margin-bottom:18px;padding:8px 0 12px;gap:12px}
+ .detail-back{min-height:44px}
+ .detail-layout{grid-template-columns:minmax(0,1fr);gap:18px}
+ .detail-gallery{grid-template-columns:minmax(0,1fr)}
+ .detail-main-photo-wrap,.detail-no-photo{height:50vh;height:50svh;min-height:260px;max-height:460px}
+ .detail-thumbs{max-width:100%;padding-bottom:6px}
+ .detail-info h1{font-size:29px;line-height:1.2}
+ .detail-info .detail-price{font-size:23px}
+ .detail-field select,.detail-buy{min-height:48px}
+ footer{padding:26px 16px;line-height:1.7}
+ footer:before{letter-spacing:2px;font-size:8px}
+}
+@media(max-width:350px){.products{grid-template-columns:minmax(0,1fr)}.logo{font-size:19px}}
+</style>
 </head>
 <body>
 <div class="topbar">✨ NOVA COLEÇÃO MARIA BONITA CONCEPT — ELEGÂNCIA EM CADA DETALHE</div>
